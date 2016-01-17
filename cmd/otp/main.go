@@ -14,7 +14,7 @@
 
 package main
 
-import "github.com/mfojtik/openshift-dev-tools/cmd/openshift-tag-pr/cmd"
+import "github.com/mfojtik/dev-tools/cmd/otp/cmd"
 
 func main() {
 	cmd.Execute()
