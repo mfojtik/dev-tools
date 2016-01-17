@@ -2,17 +2,22 @@ package cmds
 
 import (
 	"fmt"
+	"os"
 
+	gh "github.com/google/go-github/github"
 	"github.com/mfojtik/dev-tools/pkg/api"
 	"github.com/mfojtik/dev-tools/pkg/github"
 )
 
+var mergeComment = "[merge]"
+
 func AddMergeComment(pullId int) error {
-	gh := github.Login()
-	pr, _, err := gh.PullRequests.Get(api.OriginRepoOwner, api.OriginRepoName, pullId)
+	client := github.Login()
+	c := &gh.IssueComment{Body: &mergeComment}
+	comment, _, err := client.Issues.CreateComment(api.OriginRepoOwner, api.OriginRepoName, pullId, c)
 	if err != nil {
 		return err
 	}
-	fmt.Printf("pr=%+v\n", pr)
+	fmt.Fprintf(os.Stdout, "Added [merge] to %q\n", *comment.HTMLURL)
 	return nil
 }

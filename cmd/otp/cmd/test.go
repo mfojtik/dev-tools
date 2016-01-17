@@ -17,7 +17,9 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strconv"
 
+	"github.com/mfojtik/dev-tools/pkg/cmds"
 	"github.com/spf13/cobra"
 )
 
@@ -58,7 +60,7 @@ $ otp test 123 --only-extended --focus "builds" --group "core"
 			fmt.Fprintf(os.Stderr, "Error: Focus is supported for only-extended.\n\n")
 			hasError = true
 		}
-		if (isExtended || isOnlyExtended) && len(group) == 0 {
+		if isOnlyExtended && len(group) == 0 {
 			fmt.Fprintf(os.Stderr, "Error: Group must be set.\n\n")
 			hasError = true
 		}
@@ -68,7 +70,21 @@ $ otp test 123 --only-extended --focus "builds" --group "core"
 		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("test called")
+		number, err := strconv.ParseInt(args[0], 10, 32)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: The pull-id must be a number, got: %v\n", args[0])
+		}
+
+		flags := cmd.Flags()
+		isExtended, _ := flags.GetBool("extended")
+		isOnlyExtended, _ := flags.GetBool("only-extended")
+		focus, _ := flags.GetString("focus")
+		group, _ := flags.GetString("group")
+
+		if err := cmds.AddTestComment(int(number), isExtended, isOnlyExtended, focus, group); err != nil {
+			fmt.Fprintf(os.Stderr, "Error: Adding merge comment failed, got %v\n", err)
+			os.Exit(1)
+		}
 	},
 }
 

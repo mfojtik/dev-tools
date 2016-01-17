@@ -17,45 +17,34 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"strconv"
 
 	"github.com/mfojtik/dev-tools/pkg/cmds"
 	"github.com/spf13/cobra"
 )
 
-// mergeCmd represents the merge command
-var mergeCmd = &cobra.Command{
-	Use:   "merge [pull-id]",
-	Short: "Tag a pull request in origin for merge",
-	Long: `Tag a single pull request in origin for merge using CI.
+// getCmd represents the get command
+var getCmd = &cobra.Command{
+	Use:   "get",
+	Short: "Get the pull request that has the current branch",
+	Long: `Get the pull request which is based on the current branch.
 
 For example:
 
-$ otp merge 123 
+$ otp get # => 12345
 `,
-	PreRun: func(cmd *cobra.Command, args []string) {
-		hasError := false
-		if len(args) != 1 {
-			fmt.Fprintf(os.Stderr, "Error: No pull-id specified, check usage.\n\n")
-			hasError = true
-		}
-		if hasError {
-			cmd.Usage()
-			os.Exit(1)
-		}
-	},
 	Run: func(cmd *cobra.Command, args []string) {
-		number, err := strconv.ParseInt(args[0], 10, 32)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error: The pull-id must be a number, got: %v\n", args[0])
-		}
-		if err := cmds.AddMergeComment(int(number)); err != nil {
-			fmt.Fprintf(os.Stderr, "Error: Adding merge comment failed, got %v\n", err)
+		user, _ := cmd.Flags().GetString("user")
+		isQuiet, _ := cmd.Flags().GetBool("number")
+		if err := cmds.GetPullRequest(user, isQuiet); err != nil {
+			fmt.Fprintf(os.Stderr, "Error: Unable to get the pull request for current branch, got %v\n", err)
 			os.Exit(1)
 		}
 	},
 }
 
 func init() {
-	RootCmd.AddCommand(mergeCmd)
+	RootCmd.AddCommand(getCmd)
+
+	getCmd.Flags().StringP("user", "u", os.Getenv("USER"), "Github username to use for search")
+	getCmd.Flags().BoolP("number", "n", false, "Print only pull requests numbers")
 }

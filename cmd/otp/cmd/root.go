@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/mfojtik/dev-tools/pkg/api"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -43,7 +44,13 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.otp.yaml)")
-	RootCmd.PersistentFlags().StringP("api-key", "", "", "github API key")
+	apiKeyDesc := "github api key"
+	if len(os.Getenv("GITHUB_API_KEY")) > 0 {
+		apiKeyDesc += " (using GITHUB_API_KEY)"
+	}
+	RootCmd.PersistentFlags().StringP("api-key", "", "", apiKeyDesc)
+	RootCmd.PersistentFlags().StringVarP(&api.OriginRepoName, "repository", "", api.OriginRepoName, "github repository name")
+	RootCmd.PersistentFlags().StringVarP(&api.OriginRepoOwner, "owner", "", api.OriginRepoOwner, "github repository owner")
 }
 
 // initConfig reads in config file and ENV variables if set.
