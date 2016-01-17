@@ -27,9 +27,12 @@ func GetPullRequest(user string, quiet bool) error {
 	}
 	prs, _, err := client.PullRequests.List(api.OriginRepoOwner, api.OriginRepoName, opts)
 	if err != nil {
+		if quiet {
+			return nil
+		}
 		return err
 	}
-	if len(prs) == 0 {
+	if len(prs) == 0 && !quiet {
 		return fmt.Errorf("no pull request for %q", user+":"+branchName)
 	}
 	for _, p := range prs {
