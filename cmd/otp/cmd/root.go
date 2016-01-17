@@ -43,6 +43,7 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.otp.yaml)")
+	RootCmd.PersistentFlags().StringP("api-key", "", "", "github API key")
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -54,6 +55,17 @@ func initConfig() {
 	viper.SetConfigName(".otp-config")
 	viper.AddConfigPath("$HOME")
 	viper.AutomaticEnv()
+
+	apiKey, _ := RootCmd.Flags().GetString("api-key")
+	if len(apiKey) == 0 && len(os.Getenv("GITHUB_API_KEY")) > 0 {
+		RootCmd.Flags().Set("api-key", os.Getenv("GITHUB_API_KEY"))
+	}
+	if len(apiKey) > 0 {
+		if err := os.Setenv("GITHUB_API_KEY", apiKey); err != nil {
+			fmt.Fprintf(os.Stderr, "Error: Unable to set GITHUB_API_KEY\n")
+			os.Exit(1)
+		}
+	}
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {

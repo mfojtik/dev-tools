@@ -17,7 +17,9 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strconv"
 
+	"github.com/mfojtik/dev-tools/pkg/cmds"
 	"github.com/spf13/cobra"
 )
 
@@ -43,8 +45,11 @@ $ otp merge 123
 		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		// TODO: Work your own magic here
-		fmt.Println("merge called")
+		number, err := strconv.ParseInt(args[0], 10, 32)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: The pull-id must be a number, got: %v\n", args[0])
+		}
+		cmds.AddMergeComment(int(number))
 	},
 }
 
