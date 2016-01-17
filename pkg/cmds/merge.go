@@ -18,6 +18,6 @@ func AddMergeComment(pullId int) error {
 	if err != nil {
 		return err
 	}
-	fmt.Fprintf(os.Stdout, "Added [merge] to %q\n", *comment.HTMLURL)
+	fmt.Fprintf(os.Stdout, "Pull request #%d tagged for merge %q\n", pullId, *comment.HTMLURL)
 	return nil
 }

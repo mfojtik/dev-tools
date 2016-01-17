@@ -40,6 +40,6 @@ func AddTestComment(pullId int, extended, onlyExtended bool, focus, group string
 	if err != nil {
 		return err
 	}
-	fmt.Fprintf(os.Stdout, "Test comment added to %q\n", *comment.HTMLURL)
+	fmt.Fprintf(os.Stdout, "Pull request #%d tagged for test %q\n", pullId, *comment.HTMLURL)
 	return nil
 }
