@@ -40,7 +40,14 @@ $ cd dev-tools && git checkout test
 $ otp get
 Searching pull request based on "mfojtik:test" ...
 [OPEN] #1: "Test" (https://github.com/mfojtik/dev-tools/pull/1
+
+$ otp get -n
+1
 ```
+
+Note that the `-n` options will cause the command to print just the numbers of
+the pull requests found. By default, the `otp get` command searches only pull
+requests that are "open".
 
 ### test
 
