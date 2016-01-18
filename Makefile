@@ -5,7 +5,7 @@ BINARY=otp
 BINARY_OUT=bin
 
 # These are the values we want to pass for Version and BuildTime
-VERSION=0.0.1
+VERSION=0.0.2
 BUILD_TIME=$(shell date +%FT%T%z)
 BUILD_COMMIT=$(shell git rev-parse --short HEAD)
 BUILD_ARCH=$(shell uname -m)
