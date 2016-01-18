@@ -75,3 +75,23 @@ our CI (Jenkins) to merge them using a merge queue. Sample usage:
 $ otp merge $(otp get -n)
 Pull request #1 tagged for merge "https://github.com/mfojtik/dev-tools/pull/1#issuecomment-172376669"
 ```
+
+### rebuild
+
+When you modify a source code of an builder (typically `pkg/build/builders`),
+you have to rebuild the builder Docker image in order to see the results in
+OpenShift. OpenShift does not provide (yet) a way to rebuild just a single
+builder and instead, you have to execute `make release` which can take horrible
+amount of time. This command allows you to rebuild just a single image with
+updated `openshift` binary. For that you need to first compile OpenShift (`make build`).
+
+Then you can call rebuild as:
+
+```console
+$ otp rebuild --image=openshift/origin-sti-builder
+Rebuilding "openshift/origin-sti-builder" ...
+
+$ otp rebuild --builders
+Rebuilding "openshift/origin-docker-builder" ...
+Rebuilding "openshift/origin-sti-builder" ...
+```

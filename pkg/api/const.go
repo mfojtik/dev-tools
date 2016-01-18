@@ -9,6 +9,10 @@ var (
 	OriginRepoOwner    = "mfojtik"
 	OriginRepoName     = "dev-tools"
 	UpstreamRemoteName = "upstream"
+	OriginBuilders     = []string{
+		"openshift/origin-docker-builder",
+		"openshift/origin-sti-builder",
+	}
 )
 
 func init() {
