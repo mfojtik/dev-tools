@@ -1,0 +1,103 @@
+---
+- hosts: dev
+  gather_facts: False
+  # Development box configuration
+  vars:
+    # Version of golang to install
+    go_version: 1.7rc6
+    go_sha256: 45e3dfba542927ea58146a5d47a983feb36401ccafeea28a9e0a79534738b154
+    # Mounted directory with sources
+    go_path: /data
+    # Directory to install go into
+    go_install_dir: /opt
+    go_root: "{{ go_install_dir }}/go"
+    # The home folder to install the dev tools to
+    user: mfojtik
+    home: "/home/{{ user }}"
+    tools_repo: "github.com/mfojtik/dev-tools/scripts"
+
+  tasks:
+   - name: install rdate
+     yum: name=rdate state=latest
+
+   - name: synchronize vm time
+     command: /usr/bin/rdate -s time-c.nist.gov
+     ignore_errors: yes
+
+   - name: install cachefilesd
+     yum: name=cachefilesd state=latest
+     notify:
+       - enable and start cachefilesd
+
+   - name: create user bin directory
+     file: path={{ home }}/bin state=directory owner={{ user }} group={{ user }} mode=0755
+
+   - name: setup development environment
+     file: src=/data/src/{{ tools_repo }}/{{ item.src }} dest={{ home }}/{{ item.dest }} state=link owner={{ user }} group={{ user }} force=yes
+     with_items:
+       - { src: 'openshift-prep.sh', dest: 'bin/openshift-prep.sh' }
+       - { src: 'openshift-start.sh', dest: 'bin/openshift-start.sh' }
+       - { src: 'bashrc', dest: '.bashrc' }
+
+   - name: enable OpenShift internal registry in Docker daemon
+     lineinfile: dest=/etc/sysconfig/docker line="INSECURE_REGISTRY='--insecure-registry 172.30.0.0/16'"
+     notify:
+       - restart Docker daemon
+
+   - name: list local docker images
+     command: /usr/bin/docker images -q -a
+     register: docker_images
+
+   - name: list local docker containers
+     command: /usr/bin/docker ps -a -q
+     register: docker_containers
+
+   - name: list local running docker containers
+     command: /usr/bin/docker ps -q
+     register: docker_running_containers
+
+   - name: kill local running docker containers
+     command: /usr/bin/bash -c "/usr/bin/docker kill {{item}}"
+     with_items: '{{docker_running_containers.stdout_lines}}'
+     when: docker_running_containers.stdout != ""
+
+   - name: cleanup local docker containers
+     command: /usr/bin/bash -c "/usr/bin/docker rm {{item}}"
+     with_items: '{{docker_containers.stdout_lines}}'
+     when: docker_containers.stdout != ""
+
+   - name: cleanup local docker images
+     command: /usr/bin/bash -c "/usr/bin/docker rmi {{item}}"
+     with_items: '{{docker_images.stdout_lines}}'
+     when: docker_images.stdout != ""
+
+   - name: check if go is installed
+     stat: path={{ go_root }}
+     register: go_dir
+
+   - name: download the latest go
+     get_url: url="https://storage.googleapis.com/golang/go{{ go_version }}.linux-amd64.tar.gz" dest={{ go_install_dir }} checksum=sha256:{{ go_sha256 }}
+     when: go_dir.stat.exists == False
+
+   - name: extract the latest go
+     command: /usr/bin/tar xzf go{{ go_version }}.linux-amd64.tar.gz creates={{ go_root }} chdir={{ go_install_dir }}
+     when: go_dir.stat.exists == False
+
+   - name: enable go in environment
+     blockinfile:
+       dest: /etc/profile.d/go.sh
+       mode: 0777
+       create: yes
+       block: |
+         [ -z "$PS1" ] && return
+         export GOROOT={{ go_root }}
+         export GOPATH={{ go_path }}
+         export PATH=$PATH:${GOROOT}/bin
+         export OS_BIN_ROOT={{ go_path }}/src/github.com/openshift/origin/_output/local/bin/linux/amd64
+         export PATH=$PATH:$OS_BIN_ROOT
+
+  handlers:
+    - name: restart Docker daemon
+      service: name=docker state=started
+    - name: enable and start cachefilesd
+      service: name=cachefilesd state=started enabled=yes

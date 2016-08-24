@@ -6,13 +6,14 @@ import (
 )
 
 var (
-	OriginRepoOwner    = "mfojtik"
-	OriginRepoName     = "dev-tools"
+	OriginRepoOwner    = "openshift"
+	OriginRepoName     = "origin"
 	UpstreamRemoteName = "upstream"
 	OriginBuilders     = []string{
 		"openshift/origin-docker-builder",
 		"openshift/origin-sti-builder",
 	}
+	Verbose bool
 )
 
 func init() {

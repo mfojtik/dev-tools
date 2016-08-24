@@ -59,7 +59,7 @@ $ otp rebuild --image=openshift/origin-sti-builder
 }
 
 func init() {
-	RootCmd.AddCommand(rebuildCmd)
 	rebuildCmd.Flags().StringP("image", "i", "", "Image to rebuild")
 	rebuildCmd.Flags().BoolP("builders", "b", false, "Rebuild all known builders")
+	RootCmd.AddCommand(rebuildCmd)
 }

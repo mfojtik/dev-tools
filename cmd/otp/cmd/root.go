@@ -21,6 +21,8 @@ import (
 	"github.com/mfojtik/dev-tools/pkg/api"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
+	log "github.com/Sirupsen/logrus"
 )
 
 var cfgFile string
@@ -48,9 +50,11 @@ func init() {
 	if len(os.Getenv("GITHUB_API_KEY")) > 0 {
 		apiKeyDesc += " (using GITHUB_API_KEY)"
 	}
+	RootCmd.PersistentFlags().BoolVarP(&api.Verbose, "verbose", "v", api.Verbose, "turn on verbose logging")
 	RootCmd.PersistentFlags().StringP("api-key", "", "", apiKeyDesc)
 	RootCmd.PersistentFlags().StringVarP(&api.OriginRepoName, "repository", "", api.OriginRepoName, "github repository name")
 	RootCmd.PersistentFlags().StringVarP(&api.OriginRepoOwner, "owner", "", api.OriginRepoOwner, "github repository owner")
+
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -77,5 +81,13 @@ func initConfig() {
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
+	}
+
+	log.SetFormatter(&log.TextFormatter{})
+	log.SetOutput(os.Stderr)
+	if api.Verbose {
+		log.SetLevel(log.DebugLevel)
+	} else {
+		log.SetLevel(log.WarnLevel)
 	}
 }

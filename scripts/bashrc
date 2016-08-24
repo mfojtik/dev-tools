@@ -1,0 +1,47 @@
+# .bashrc
+
+# Source global definitions
+if [ -f /etc/bashrc ]; then
+	. /etc/bashrc
+fi
+
+# Uncomment the following line if you don't like systemctl's auto-paging feature:
+# export SYSTEMD_PAGER=
+
+# User specific aliases and functions
+
+shopt -s cdspell  # This will correct minor spelling errors in a cd command.
+shopt -s histappend # Append to history rather than overwrite
+shopt -s dotglob  # files beginning with . to be returned in the results of path-name expansion.
+shopt -s nocaseglob
+set -o noclobber
+shopt -s checkwinsize
+shopt -s histappend
+shopt -s autocd
+shopt -s dirspell
+
+export GIT_AUTHOR_NAME='Michal Fojtik'
+export GIT_COMMITTER_NAME='Michal Fojtik'
+export GIT_AUTHOR_EMAIL='mfojtik@redhat.com'
+export GIT_COMMITTER_EMAIL='mfojtik@redhat.com'
+
+export EDITOR="vim"
+export VISUAL="vim"
+
+export PROMPT_DIRTRIM=2
+
+alias docker="sudo docker"
+alias cd-origin="cd /data/src/github.com/openshift/origin"
+alias cd-kube="cd /data/src/k8s.io/kubernetes"
+alias openshift-prep="sudo $HOME/bin/openshift-prep.sh"
+alias openshift-start="sudo $HOME/bin/openshift-start.sh"
+alias openshift-kill="sudo pkill --sig HUP openshift"
+
+
+function lcd() {
+  local d=$1
+  target=$(readlink -f $1)
+  cd "${target}"
+}
+
+export PS1="[@\[\e[32m\]\h\[\e[m\]] \w # "

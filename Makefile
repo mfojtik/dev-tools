@@ -23,8 +23,10 @@ install:
 
 .PHONY: clean
 clean:
-	if [ -d ${BINARY_OUT} ] ; then rm -rf ${BINARY_OUT} ; fi
+	rm -rf ${BINARY_OUT} _release
 
 .PHONY: release
 release:
-	tar czvf dev-tools-${VERSION}-${BUILD_COMMIT}-${BUILD_ARCH}-${BUILD_OS}.tar.gz -C bin .
+	[ ! -d bin ] && echo "Run make first." && exit 1;\
+	mkdir -p _release && \
+	tar czvf _release/dev-tools-${VERSION}-${BUILD_COMMIT}-${BUILD_ARCH}-${BUILD_OS}.tar.gz -C bin .
